@@ -257,3 +257,47 @@ endef
 define gomodver
 $(shell go list -m -f '{{if .Replace}}{{.Replace.Version}}{{else}}{{.Version}}{{end}}' $(1) 2>/dev/null)
 endef
+
+##@ Demo (local kind + simulated devices)
+
+N ?= 5
+
+.PHONY: kind-up
+kind-up: ## Create (or repair) the kind cluster and install CRDs.
+	hack/ensure-kind.sh
+
+.PHONY: install-crd
+install-crd: install ## Alias for `make install` (CRDs into current context).
+
+.PHONY: run-operator
+run-operator: manifests generate ## Run the operator in the foreground (metrics on :8080).
+	go run ./cmd/main.go --heartbeat-timeout=12s --metrics-bind-address=:8080 --metrics-secure=false
+
+.PHONY: run-agents
+run-agents: ## Start N simulated device agents in the background (default N=5).
+	hack/run-agents.sh $(N)
+
+.PHONY: demo-rollout
+demo-rollout: kind-up ## Batched fleet upgrade; a device dies → Degraded → circuit breaker.
+	hack/demo-rollout.sh
+
+.PHONY: demo-conflict
+demo-conflict: kind-up ## Optimistic concurrency: stale write → 409 → re-read → latest wins.
+	hack/demo-conflict.sh
+
+.PHONY: demo-brick-safety
+demo-brick-safety: kind-up ## Bad checksum: firmware is never flashed, device survives.
+	hack/demo-brick-safety.sh
+
+.PHONY: stop-demo
+stop-demo: ## Kill demo processes and remove demo CRs.
+	hack/stop-demo.sh
+
+.PHONY: clean
+clean: ## Tear down the kind cluster and all demo state.
+	-hack/stop-demo.sh
+	-kind delete cluster --name edge-fleet
+	rm -rf $(HOME)/.edge-fleet
+
+.PHONY: ci
+ci: vet test ## The full local CI gate (vet + all tests incl. envtest).
