@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/edge.example.com_edgedevices.yaml
+- bases/edge.example.com_fleetrollouts.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

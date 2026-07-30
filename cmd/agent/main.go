@@ -48,6 +48,7 @@ func main() {
 		log.Error("kube client", "err", err)
 		os.Exit(1)
 	}
+	kube.Log = log
 	a, err := agent.New(agent.Config{
 		Name:              *name,
 		Namespace:         *namespace,

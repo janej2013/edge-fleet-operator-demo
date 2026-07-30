@@ -1,0 +1,9 @@
+apiVersion: edge.example.com/v1alpha1
+kind: FleetRollout
+metadata:
+  labels:
+    app.kubernetes.io/name: edge-fleet-operator-demo
+    app.kubernetes.io/managed-by: kustomize
+  name: fleetrollout-sample
+spec:
+  # TODO(user): Add fields here

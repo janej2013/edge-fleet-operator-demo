@@ -22,6 +22,9 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the edge-fleet-operator-demo itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
+- fleetrollout_admin_role.yaml
+- fleetrollout_editor_role.yaml
+- fleetrollout_viewer_role.yaml
 - edgedevice_admin_role.yaml
 - edgedevice_editor_role.yaml
 - edgedevice_viewer_role.yaml

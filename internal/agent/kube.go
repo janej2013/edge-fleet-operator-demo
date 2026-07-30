@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -88,6 +89,9 @@ type KubeClient struct {
 	namespace string
 	name      string
 	httpc     *http.Client
+	// Log, when set, narrates conflict handling — the 409 dance is the
+	// point of the demo, so it deserves a log line you can grep for.
+	Log *slog.Logger
 }
 
 func NewKubeClient(server, kubeconfig, namespace, name string) (*KubeClient, error) {
@@ -179,6 +183,10 @@ func (c *KubeClient) UpdateStatus(ctx context.Context, mutate func(*Device)) (*D
 		mutate(dev)
 		if err := c.PutStatus(ctx, dev); err != nil {
 			if errors.Is(err, ErrConflict) {
+				if c.Log != nil {
+					c.Log.Info("status write conflicted (409): discarding stale view, re-reading latest",
+						"attempt", attempt+1, "staleResourceVersion", dev.Metadata.ResourceVersion)
+				}
 				lastErr = err
 				continue // stale view discarded; loop re-reads the winner
 			}

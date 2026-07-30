@@ -19,6 +19,7 @@ rules:
   - edge.example.com
   resources:
   - edgedevices
+  - fleetrollouts
   verbs:
   - create
   - delete
@@ -31,12 +32,14 @@ rules:
   - edge.example.com
   resources:
   - edgedevices/finalizers
+  - fleetrollouts/finalizers
   verbs:
   - update
 - apiGroups:
   - edge.example.com
   resources:
   - edgedevices/status
+  - fleetrollouts/status
   verbs:
   - get
   - patch
